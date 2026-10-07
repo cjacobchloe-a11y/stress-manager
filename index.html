@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worry Board</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --burgundy: #651f2d;
+        --dark-burgundy: #42141e;
+        --cherry: #8f263c;
+        --light-cherry: #b94b60;
+        --cream: #f7f1ed;
+        --paper: #fffdfb;
+        --border: #dfcfd0;
+        --text: #321d23;
+        --muted: #876e74;
+        --soft: #f0e3e4;
+        --green: #476653;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--cream);
+        color: var(--text);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    /* HEADER */
+
+    header {
+        background: var(--dark-burgundy);
+        color: white;
+        padding: 22px 34px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .logo {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .header-btn {
+        border: 1px solid rgba(255,255,255,.3);
+        background: transparent;
+        color: white;
+        padding: 9px 15px;
+        border-radius: 7px;
+    }
+
+    .header-btn:hover {
+        background: rgba(255,255,255,.1);
+    }
+
+    /* MAIN */
+
+    main {
+        max-width: 1500px;
+        margin: auto;
+        padding: 30px;
+    }
+
+    .top-section {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 22px;
+        margin-bottom: 25px;
+    }
+
+    .panel {
+        background: var(--paper);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px;
+    }
+
+    .panel h2 {
+        margin: 0 0 7px;
+        font-size: 18px;
+    }
+
+    .panel p {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .worry-input {
+        display: flex;
+        gap: 10px;
+    }
+
+    .worry-input input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 13px 14px;
+        outline: none;
+        background: white;
+    }
+
+    .worry-input input:focus {
+        border-color: var(--cherry);
+    }
+
+    .primary {
+        border: none;
+        background: var(--burgundy);
+        color: white;
+        padding: 0 20px;
+        border-radius: 7px;
+        font-weight: 600;
+    }
+
+    .primary:hover {
+        background: var(--cherry);
+    }
+
+    /* STATS */
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .stat {
+        background: var(--soft);
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .stat-number {
+        font-size: 25px;
+        font-weight: 700;
+        color: var(--burgundy);
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    /* TOOLBAR */
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .toolbar h1 {
+        margin: 0;
+        font-size: 25px;
+    }
+
+    .filters {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filters input,
+    .filters select {
+        border: 1px solid var(--border);
+        background: white;
+        padding: 9px 11px;
+        border-radius: 7px;
+        outline: none;
+    }
+
+    /* BOARD */
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(250px, 1fr));
+        gap: 18px;
+    }
+
+    .topic {
+        background: #eee1e2;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        min-height: 330px;
+        overflow: hidden;
+    }
+
+    .topic.drag-over {
+        border: 2px dashed var(--cherry);
+        background: #f3dfe2;
+    }
+
+    .topic-header {
+        padding: 15px;
+        background: var(--burgundy);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .topic-title {
+        font-weight: 700;
+    }
+
+    .topic-count {
+        background: rgba(255,255,255,.18);
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .topic-body {
+        padding: 12px;
+        min-height: 275px;
+    }
+
+    .empty-topic {
+        color: var(--muted);
+        text-align: center;
+        padding: 50px 15px;
+        font-size: 13px;
+    }
+
+    /* WORRY CARD */
+
+    .worry-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 14px;
+        margin-bottom: 10px;
+        cursor: grab;
+        box-shadow: 0 2px 5px rgba(50,20,25,.04);
+    }
+
+    .worry-card:active {
+        cursor: grabbing;
+    }
+
+    .worry-card:hover {
+        border-color: var(--light-cherry);
+    }
+
+    .worry-text {
+        font-size: 14px;
+        line-height: 1.45;
+        margin-bottom: 12px;
+    }
+
+    .card-meta {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        font-size: 11px;
+        padding: 4px 7px;
+        border-radius: 5px;
+        background: var(--soft);
+        color: var(--burgundy);
+    }
+
+    .tag.high {
+        background: #ead0d4;
+        color: #7b1f32;
+    }
+
+    .tag.low {
+        background: #e2ebe4;
+        color: var(--green);
+    }
+
+    .card-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+    }
+
+    .open-btn {
+        border: none;
+        background: transparent;
+        color: var(--burgundy);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 3px;
+    }
+
+    .open-btn:hover {
+        text-decoration: underline;
+    }
+
+    /* ADD TOPIC */
+
+    .add-topic {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        min-height: 330px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        cursor: pointer;
+    }
+
+    .add-topic:hover {
+        border-color: var(--cherry);
+        color: var(--burgundy);
+    }
+
+    /* MODAL */
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(30,10,15,.58);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 100;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal {
+        width: min(720px, 100%);
+        max-height: 90vh;
+        overflow-y: auto;
+        background: var(--paper);
+        border-radius: 13px;
+        padding: 25px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+    }
+
+    .close {
+        border: none;
+        background: transparent;
+        font-size: 23px;
+        color: var(--muted);
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 11px;
+        outline: none;
+        background: white;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+        line-height: 1.5;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: var(--cherry);
+    }
+
+    .levels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .range-value {
+        font-weight: 700;
+        color: var(--burgundy);
+    }
+
+    input[type="range"] {
+        width: 100%;
+        accent-color: var(--burgundy);
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+    }
+
+    .secondary {
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+        padding: 10px 16px;
+        border-radius: 7px;
+    }
+
+    .danger {
+        border: 1px solid #c88b96;
+        background: white;
+        color: #8b273c;
+        padding: 10px 16px;
+        border-radius: 7px;
+    }
+
+    .resolve {
+        border: none;
+        background: var(--green);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 7px;
+    }
+
+    /* SOLUTION */
+
+    .solution-section {
+        border-top: 1px solid var(--border);
+        margin-top: 22px;
+        padding-top: 22px;
+    }
+
+    .solution-section h3 {
+        margin: 0 0 5px;
+        font-size: 15px;
+    }
+
+    .solution-section p {
+        color: var(--muted);
+        font-size: 12px;
+        margin: 0 0 12px;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 1000px) {
+        .top-section {
+            grid-template-columns: 1fr;
+        }
+
+        .board {
+            grid-template-columns: repeat(2, minmax(250px, 1fr));
+        }
+    }
+
+    @media (max-width: 700px) {
+        header {
+            padding: 18px;
+        }
+
+        main {
+            padding: 18px;
+        }
+
+        .board {
+            grid-template-columns: 1fr;
+        }
+
+        .toolbar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .filters {
+            width: 100%;
+        }
+
+        .filters input,
+        .filters select {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .worry-input {
+            flex-direction: column;
+        }
+
+        .primary {
+            padding: 12px;
+        }
+
+        .levels {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">Worry Board</div>
+
+    <div class="header-actions">
+        <button class="header-btn" onclick="resetBoard()">Reset board</button>
+    </div>
+</header>
+
+<main>
+
+    <section class="top-section">
+
+        <div class="panel">
+            <h2>Add a worry</h2>
+            <p>Enter one thing at a time. You can organise it afterwards.</p>
+
+            <div class="worry-input">
+                <input
+                    id="worryInput"
+                    type="text"
+                    placeholder="What is on your mind?"
+                    onkeydown="handleEnter(event)"
+                >
+
+                <button class="primary" onclick="addWorry()">
+                    Add worry
+                </button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Overview</h2>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-number" id="activeCount">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-number" id="resolvedCount">0</div>
+                    <div class="stat-label">Resolved</div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="toolbar">
+        <h1>Your worries</h1>
+
+        <div class="filters">
+            <input
+                id="searchInput"
+                type="text"
+                placeholder="Search"
+                oninput="renderBoard()"
+            >
+
+            <select id="filterSelect" onchange="renderBoard()">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="resolved">Resolved</option>
+                <option value="high-stress">High stress</option>
+                <option value="high-priority">High priority</option>
+            </select>
+        </div>
+    </div>
+
+    <section class="board" id="board"></section>
+
+</main>
+
+<!-- WORRY MODAL -->
+
+<div class="modal-overlay" id="worryModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+            <h2>Edit worry</h2>
+
+            <button class="close" onclick="closeModal()">
+                ×
+            </button>
+        </div>
+
+        <div class="form-group">
+            <label>Worry</label>
+
+            <input id="editWorry">
+        </div>
+
+        <div class="form-group">
+            <label>Topic</label>
+
+            <select id="editTopic"></select>
+        </div>
+
+        <div class="levels">
+
+            <div class="form-group">
+                <label>
+                    Stress:
+                    <span class="range-value" id="stressValue">3</span>/5
+                </label>
+
+                <input
+                    id="stressRange"
+                    type="range"
+                    min="1"
+                    max="5"
+                    value="3"
+                    oninput="updateRangeLabels()"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Priority:
+                    <span class="range-value" id="priorityValue">3</span>/5
+                </label>
+
+                <input
+                    id="priorityRange"
+                    type="range"
+                    min="1"
+                    max="5"
+                    value="3"
+                    oninput="updateRangeLabels()"
+                >
+            </div>
+
+        </div>
+
+        <div class="solution-section">
+
+            <h3>Discussion</h3>
+            <p>Write through the problem before deciding what to do.</p>
+
+            <div class="form-group">
+                <textarea
+                    id="discussion"
+                    placeholder="What is actually happening? What is causing the worry? What is within your control?"
+                ></textarea>
+            </div>
+
+            <h3>Possible solution</h3>
+            <p>Turn the discussion into something specific.</p>
+
+            <div class="form-group">
+                <textarea
+                    id="solution"
+                    placeholder="What could you do about this?"
+                ></textarea>
+            </div>
+
+            <h3>Next step</h3>
+
+            <div class="form-group">
+                <textarea
+                    id="nextStep"
+                    placeholder="What is the next practical action?"
+                ></textarea>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button class="danger" onclick="deleteCurrentWorry()">
+                Delete
+            </button>
+
+            <div style="display:flex; gap:8px;">
+                <button class="secondary" onclick="closeModal()">
+                    Cancel
+                </button>
+
+                <button class="resolve" onclick="toggleResolved()">
+                    <span id="resolveText">Mark resolved</span>
+                </button>
+
+                <button class="primary" onclick="saveWorry()">
+                    Save
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+let worries = JSON.parse(localStorage.getItem("worryBoardWorries")) || [];
+
+let topics = JSON.parse(localStorage.getItem("worryBoardTopics")) || [
+    "General",
+    "Work",
+    "Relationships",
+    "Money",
+    "Health",
+    "Future"
+];
+
+let currentWorryId = null;
+
+
+/* SAVE */
+
+function saveData() {
+    localStorage.setItem(
+        "worryBoardWorries",
+        JSON.stringify(worries)
+    );
+
+    localStorage.setItem(
+        "worryBoardTopics",
+        JSON.stringify(topics)
+    );
+}
+
+
+/* ADD WORRY */
+
+function addWorry() {
+
+    const input = document.getElementById("worryInput");
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    const worry = {
+        id: Date.now(),
+        text: text,
+        topic: "General",
+        stress: 3,
+        priority: 3,
+        discussion: "",
+        solution: "",
+        nextStep: "",
+        resolved: false,
+        created: new Date().toISOString()
+    };
+
+    worries.push(worry);
+
+    input.value = "";
+
+    saveData();
+
+    renderBoard();
+
+    openWorry(worry.id);
+}
+
+
+/* ENTER */
+
+function handleEnter(event) {
+
+    if (event.key === "Enter") {
+        addWorry();
+    }
+}
+
+
+/* RENDER BOARD */
+
+function renderBoard() {
+
+    const board = document.getElementById("board");
+
+    board.innerHTML = "";
+
+    const search =
+        document.getElementById("searchInput").value
+        .toLowerCase();
+
+    const filter =
+        document.getElementById("filterSelect").value;
+
+    topics.forEach(topic => {
+
+        const topicElement = document.createElement("div");
+
+        topicElement.className = "topic";
+
+        topicElement.dataset.topic = topic;
+
+        topicElement.ondragover = allowDrop;
+
+        topicElement.ondragenter = function() {
+            this.classList.add("drag-over");
+        };
+
+        topicElement.ondragleave = function() {
+            this.classList.remove("drag-over");
+        };
+
+        topicElement.ondrop = function(event) {
+
+            event.preventDefault();
+
+            this.classList.remove("drag-over");
+
+            const id = event.dataTransfer.getData("text/plain");
+
+            const worry = worries.find(w => w.id == id);
+
+            if (worry) {
+                worry.topic = topic;
+                saveData();
+                renderBoard();
+            }
+        };
+
+
+        const header = document.createElement("div");
+
+        header.className = "topic-header";
+
+        const topicWorries = getTopicWorries(topic);
+
+        header.innerHTML = `
+            <span class="topic-title">${escapeHTML(topic)}</span>
+            <span class="topic-count">${topicWorries.length}</span>
+        `;
+
+
+        const body = document.createElement("div");
+
+        body.className = "topic-body";
+
+
+        const visibleWorries = topicWorries.filter(worry => {
+
+            const matchesSearch =
+                worry.text.toLowerCase().includes(search);
+
+            let matchesFilter = true;
+
+            if (filter === "active") {
+                matchesFilter = !worry.resolved;
+            }
+
+            if (filter === "resolved") {
+                matchesFilter = worry.resolved;
+            }
+
+            if (filter === "high-stress") {
+                matchesFilter = worry.stress >= 4;
+            }
+
+            if (filter === "high-priority") {
+                matchesFilter = worry.priority >= 4;
+            }
+
+            return matchesSearch && matchesFilter;
+        });
+
+
+        if (visibleWorries.length === 0) {
+
+            body.innerHTML = `
+                <div class="empty-topic">
+                    Drop worries here
+                </div>
+            `;
+
+        } else {
+
+            visibleWorries.forEach(worry => {
+
+                body.appendChild(createWorryCard(worry));
+
+            });
+
+        }
+
+
+        topicElement.appendChild(header);
+
+        topicElement.appendChild(body);
+
+        board.appendChild(topicElement);
+
+    });
+
+
+    const addTopic = document.createElement("div");
+
+    addTopic.className = "add-topic";
+
+    addTopic.innerHTML = "+ Add topic";
+
+    addTopic.onclick = addTopicPrompt;
+
+    board.appendChild(addTopic);
+
+
+    updateStats();
+}
+
+
+/* CREATE CARD */
+
+function createWorryCard(worry) {
+
+    const card = document.createElement("div");
+
+    card.className = "worry-card";
+
+    card.draggable = true;
+
+    card.dataset.id = worry.id;
+
+    card.ondragstart = function(event) {
+
+        event.dataTransfer.setData(
+            "text/plain",
+            worry.id
+        );
+    };
+
+
+    let stressClass = "";
+
+    if (worry.stress >= 4) {
+        stressClass = "high";
+    }
+
+    if (worry.stress <= 2) {
+        stressClass = "low";
+    }
+
+
+    let priorityClass = "";
+
+    if (worry.priority >= 4) {
+        priorityClass = "high";
+    }
+
+    if (worry.priority <= 2) {
+        priorityClass = "low";
+    }
+
+
+    card.innerHTML = `
+
+        <div class="worry-text">
+            ${escapeHTML(worry.text)}
+        </div>
+
+        <div class="card-meta">
+
+            <span class="tag ${stressClass}">
+                Stress ${worry.stress}/5
+            </span>
+
+            <span class="tag ${priorityClass}">
+                Priority ${worry.priority}/5
+            </span>
+
+            ${
+                worry.resolved
+                ? `<span class="tag low">Resolved</span>`
+                : ""
+            }
+
+        </div>
+
+        <div class="card-actions">
+
+            <button class="open-btn">
+                Open
+            </button>
+
+        </div>
+    `;
+
+
+    card.querySelector(".open-btn").onclick = function(event) {
+
+        event.stopPropagation();
+
+        openWorry(worry.id);
+
+    };
+
+
+    return card;
+}
+
+
+/* GET TOPIC WORRIES */
+
+function getTopicWorries(topic) {
+
+    return worries.filter(
+        worry => worry.topic === topic
+    );
+
+}
+
+
+/* OPEN WORRY */
+
+function openWorry(id) {
+
+    const worry = worries.find(
+        w => w.id === id
+    );
+
+    if (!worry) return;
+
+    currentWorryId = id;
+
+    document.getElementById("editWorry").value =
+        worry.text;
+
+    populateTopicSelect();
+
+    document.getElementById("editTopic").value =
+        worry.topic;
+
+    document.getElementById("stressRange").value =
+        worry.stress;
+
+    document.getElementById("priorityRange").value =
+        worry.priority;
+
+    document.getElementById("discussion").value =
+        worry.discussion || "";
+
+    document.getElementById("solution").value =
+        worry.solution || "";
+
+    document.getElementById("nextStep").value =
+        worry.nextStep || "";
+
+    document.getElementById("resolveText").textContent =
+        worry.resolved
+        ? "Mark active"
+        : "Mark resolved";
+
+    updateRangeLabels();
+
+    document
+        .getElementById("worryModal")
+        .classList.add("active");
+}
+
+
+/* POPULATE TOPICS */
+
+function populateTopicSelect() {
+
+    const select =
+        document.getElementById("editTopic");
+
+    select.innerHTML = "";
+
+    topics.forEach(topic => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = topic;
+
+        option.textContent = topic;
+
+        select.appendChild(option);
+
+    });
+}
+
+
+/* SAVE WORRY */
+
+function saveWorry() {
+
+    const worry =
+        worries.find(
+            w => w.id === currentWorryId
+        );
+
+    if (!worry) return;
+
+
+    worry.text =
+        document
+            .getElementById("editWorry")
+            .value
+            .trim();
+
+
+    worry.topic =
+        document
+            .getElementById("editTopic")
+            .value;
+
+
+    worry.stress =
+        Number(
+            document
+                .getElementById("stressRange")
+                .value
+        );
+
+
+    worry.priority =
+        Number(
+            document
+                .getElementById("priorityRange")
+                .value
+        );
+
+
+    worry.discussion =
+        document
+            .getElementById("discussion")
+            .value;
+
+
+    worry.solution =
+        document
+            .getElementById("solution")
+            .value;
+
+
+    worry.nextStep =
+        document
+            .getElementById("nextStep")
+            .value;
+
+
+    saveData();
+
+    closeModal();
+
+    renderBoard();
+}
+
+
+/* DELETE */
+
+function deleteCurrentWorry() {
+
+    if (!currentWorryId) return;
+
+    const confirmed =
+        confirm("Delete this worry?");
+
+    if (!confirmed) return;
+
+    worries =
+        worries.filter(
+            w => w.id !== currentWorryId
+        );
+
+    saveData();
+
+    closeModal();
+
+    renderBoard();
+}
+
+
+/* RESOLVED */
+
+function toggleResolved() {
+
+    const worry =
+        worries.find(
+            w => w.id === currentWorryId
+        );
+
+    if (!worry) return;
+
+    worry.resolved =
+        !worry.resolved;
+
+    document.getElementById("resolveText")
+        .textContent =
+        worry.resolved
+        ? "Mark active"
+        : "Mark resolved";
+
+    saveData();
+
+    renderBoard();
+}
+
+
+/* RANGE LABELS */
+
+function updateRangeLabels() {
+
+    document.getElementById("stressValue")
+        .textContent =
+        document.getElementById("stressRange").value;
+
+    document.getElementById("priorityValue")
+        .textContent =
+        document.getElementById("priorityRange").value;
+}
+
+
+/* CLOSE MODAL */
+
+function closeModal() {
+
+    document
+        .getElementById("worryModal")
+        .classList.remove("active");
+
+    currentWorryId = null;
+}
+
+
+/* ADD TOPIC */
+
+function addTopicPrompt() {
+
+    const topic =
+        prompt("Topic name:");
+
+    if (!topic) return;
+
+    const clean =
+        topic.trim();
+
+    if (!clean) return;
+
+    if (topics.includes(clean)) {
+
+        alert("That topic already exists.");
+
+        return;
+    }
+
+    topics.push(clean);
+
+    saveData();
+
+    renderBoard();
+}
+
+
+/* RESET */
+
+function resetBoard() {
+
+    const confirmed =
+        confirm(
+            "This will delete all worries and custom topics. Continue?"
+        );
+
+    if (!confirmed) return;
+
+    worries = [];
+
+    topics = [
+        "General",
+        "Work",
+        "Relationships",
+        "Money",
+        "Health",
+        "Future"
+    ];
+
+    saveData();
+
+    renderBoard();
+}
+
+
+/* DRAG */
+
+function allowDrop(event) {
+
+    event.preventDefault();
+
+}
+
+
+/* STATS */
+
+function updateStats() {
+
+    const total =
+        worries.length;
+
+    const resolved =
+        worries.filter(
+            w => w.resolved
+        ).length;
+
+    const active =
+        total - resolved;
+
+
+    document.getElementById("totalCount")
+        .textContent = total;
+
+    document.getElementById("activeCount")
+        .textContent = active;
+
+    document.getElementById("resolvedCount")
+        .textContent = resolved;
+}
+
+
+/* ESCAPE HTML */
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+
+/* CLICK OUTSIDE MODAL */
+
+document
+    .getElementById("worryModal")
+    .addEventListener("click", function(event) {
+
+        if (event.target === this) {
+            closeModal();
+        }
+
+    });
+
+
+/* INITIAL LOAD */
+
+renderBoard();
+
+</script>
+
+</body>
+</html>
